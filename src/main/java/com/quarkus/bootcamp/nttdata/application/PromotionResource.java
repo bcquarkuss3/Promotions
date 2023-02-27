@@ -3,6 +3,7 @@ package com.quarkus.bootcamp.nttdata.application;
 import com.quarkus.bootcamp.nttdata.domain.entity.Promotion;
 import com.quarkus.bootcamp.nttdata.domain.service.PromotionService;
 
+import io.micrometer.core.instrument.MeterRegistry;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.GET;
@@ -20,7 +21,17 @@ public class PromotionResource {
 
 	@Inject
 	PromotionService promotionService;
-
+	
+	// usando metricas de prometeus
+	 private final MeterRegistry registry;
+	 
+	 
+	 
+	
+	 
+	 public PromotionResource(MeterRegistry registry) {
+		 this.registry = registry;
+	 }
 	
 	/**
 	 * CREAR UNA PROMOCION
@@ -36,6 +47,14 @@ public class PromotionResource {
 	@GET
 	@Path("/{key}")
 	public Response get(@PathParam("key") String key) {
+		if("PROM123".equals(key)) {
+			registry.counter("promotion.key", "type", "PROM123").increment();
+		} else if("COCA".equals(key)){
+			registry.counter("promotion.key", "type", "COCA").increment();
+		} else {
+			registry.counter("promotion.key", "type", "others").increment();
+		}
+		
 		return Response.ok(promotionService.get(key)).status(201).build();
 	}
 
